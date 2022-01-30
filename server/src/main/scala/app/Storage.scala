@@ -8,7 +8,7 @@ import akka.util.Timeout
 import java.io.File
 import java.util.Date
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
 /**
@@ -75,9 +75,11 @@ class Storage extends Actor with ActorLogging with Stash with ProcessCsv with IC
       sender() ! Cells(cache().toList)
 
     case GetByDate(date) => log.info(s"GetByDate($date)")
-      cache().collect {
-        case Cell(start, end, price) if start.getTime <= date.getTime && date.getTime <= end.getTime =>
-          sender() ! Price(date, price)
+      cache().collectFirst {
+        case Cell(start, end, price) if start.getTime <= date.getTime && date.getTime <= end.getTime => price
+      } match {
+        case Some(price) => sender() ! Price(date, price)
+        case None => sender() ! BadAction("Sorry, storage doesn't have the price of the date")
       }
 
     case GetByDates(targetStart, targetEnd) => log.info(s"GetByDates($targetStart, $targetEnd)")
@@ -85,17 +87,22 @@ class Storage extends Actor with ActorLogging with Stash with ProcessCsv with IC
         case (Cell(start, end, price), (sum, count)) if conditionByDates(targetStart, targetEnd, start, end)=>
           (sum + price, count + 1)
         case (_, acc) => acc
-      }.divideLeftOpt foreach { sender() ! AveragePrice(targetStart, targetEnd, _) }
+      }.divideLeftOpt match {
+        case Some(price) => sender() ! AveragePrice(targetStart, targetEnd, price)
+        case None => sender() ! BadAction("Sorry, storage doesn't have the average price of the dates")
+      }
 
     case GetMaxMinByDates(targetStart, targetEnd) => log.info(s"GetMaxMinByDates($targetStart, $targetEnd)")
-      val (min, max) = cache().foldRight(Double.MaxValue, Double.MinValue) {
+      cache().foldRight(Double.MaxValue, Double.MinValue) {
         case (Cell(start, end, price), (min, max)) if conditionByDates(targetStart, targetEnd, start, end) && (price < min || (price > max)) =>
           (math.min(min, price), math.max(max, price))
         case (_, acc) => acc
+      } match {
+        case (min, max) if min != Double.MaxValue && max != Double.MinValue =>
+          sender() ! MaxMinPrices(targetStart, targetEnd, min, max)
+        case _ =>
+          sender() ! BadAction("Sorry, storage doesn't have min and max prices of the dates")
       }
-      sender() ! MaxMinPrices(targetStart, targetEnd, min, max)
-    // TODO Add error handling
-
 
     case _ => log.error("Bad message")
   }
@@ -118,14 +125,14 @@ trait StorageApi {
   }
 
   def getCells() =
-    storage.ask(GetCells).mapTo[Cells]
+    storage.ask(GetCells).mapTo[StorageResponse]
 
   def getByDate(date: Date) =
-    storage.ask(GetByDate(date)).mapTo[Price]
+    storage.ask(GetByDate(date)).mapTo[StorageResponse]
 
   def getByDates(start: Date, end: Date) =
-    storage.ask(GetByDates(start, end)).mapTo[AveragePrice]
+    storage.ask(GetByDates(start, end)).mapTo[StorageResponse]
 
   def getMinMaxByDates(start: Date, end: Date) =
-    storage.ask(GetMaxMinByDates(start, end)).mapTo[MaxMinPrices]
+    storage.ask(GetMaxMinByDates(start, end)).mapTo[StorageResponse]
 }

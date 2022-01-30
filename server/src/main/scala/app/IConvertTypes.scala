@@ -11,8 +11,10 @@ trait IConvertTypes extends IConvertStringToDouble with IConvertStringToDate wit
 
 trait IDivideTuple {
   implicit class DivideTuple2(tuple2: (Double, Int)) {
-    def divideLeftOpt = Try(tuple2._1 / tuple2._2).toOption
-    def divideRightOpt = Try(tuple2._2 / tuple2._1).toOption
+    private def condition(res: => Option[Double]) = if(tuple2._1 != 0 && tuple2._2 != 0) res else None
+
+    def divideLeftOpt =  condition(Try(tuple2._1 / tuple2._2).toOption)
+    def divideRightOpt = condition(Try(tuple2._2 / tuple2._1).toOption)
   }
 }
 

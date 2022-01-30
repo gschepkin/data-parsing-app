@@ -11,17 +11,21 @@ import scala.util.Try
  * Created by schepkin on 30.01.2022.
  */
 
-case class Cell(startDate: Date, endDate: Date, price: Double)
-case class Cells(cells: List[Cell])
+sealed trait StorageResponse
 
-case class ByDate(date: Date)
-case class Price(date: Date, price: Double)
+case class Cell(startDate: Date, endDate: Date, price: Double) extends StorageResponse
+case class Cells(cells: List[Cell]) extends StorageResponse
 
-case class ByDates(start: Date, end: Date)
-case class AveragePrice(start: Date, end: Date, price: Double)
+case class ByDate(date: Date) extends StorageResponse
+case class Price(date: Date, price: Double) extends StorageResponse
 
-case class MaxMinByDates(start: Date, end: Date)
-case class MaxMinPrices(start: Date, end: Date, max: Double, min: Double)
+case class ByDates(start: Date, end: Date) extends StorageResponse
+case class AveragePrice(start: Date, end: Date, price: Double) extends StorageResponse
+
+case class MaxMinByDates(start: Date, end: Date) extends StorageResponse
+case class MaxMinPrices(start: Date, end: Date, max: Double, min: Double) extends StorageResponse
+
+case class BadAction(failure: String) extends StorageResponse
 
 trait DateMarshaling {
   implicit object DateFormat extends JsonFormat[Date] {
@@ -54,4 +58,5 @@ trait StorageMarshaling extends DefaultJsonProtocol with DateMarshaling {
   implicit val averagePriceFormat = jsonFormat3(AveragePrice)
   implicit val maxMinByDatesFormat = jsonFormat2(MaxMinByDates)
   implicit val maxMinPricesFormat = jsonFormat4(MaxMinPrices)
+  implicit val badActionFormat = jsonFormat1(BadAction)
 }

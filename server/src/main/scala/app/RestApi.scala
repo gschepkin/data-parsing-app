@@ -30,26 +30,20 @@ trait RestRoutes extends StorageApi with StorageMarshaling {
 
   def fileCSV: File
 
-  def routes: Route = process ~ cells ~ priceForDate ~ averageForDates ~ maxMinForDates
+  startProcess(fileCSV)
+
+  def routes: Route = cells ~ priceForDate ~ averageForDates ~ maxMinForDates
 
   val log = Logging(system.eventStream, "system")
-
-  def process =
-    path("api" / "process") {
-      get {
-        // GET /api/process
-        onSuccess(startProcess(fileCSV)) {
-          complete(OK)
-        }
-      }
-    }
 
   def cells =
     path("api" / "cells") {
       get {
         // GET /api/cells
-        onSuccess(getCells()) { cells =>
-          complete(OK, cells)
+        onSuccess(getCells()) {
+          case cells: Cells => complete(OK, cells)
+          case failure: BadAction => complete(OK, failure)
+          case _ => complete(BadRequest)
         }
       }
     }
@@ -59,8 +53,10 @@ trait RestRoutes extends StorageApi with StorageMarshaling {
       get {
         // GET /api/price-by-date
         entity(as[ByDate]) { entity =>
-          onSuccess(getByDate(entity.date)) { price =>
-            complete(OK, price)
+          onSuccess(getByDate(entity.date)) {
+            case price: Price => complete(OK, price)
+            case failure: BadAction => complete(OK, failure)
+            case _ => complete(BadRequest)
           }
         }
       }
@@ -71,8 +67,10 @@ trait RestRoutes extends StorageApi with StorageMarshaling {
       get {
         // GET /api/average_price_by_dates
         entity(as[ByDates]) { entity =>
-          onSuccess(getByDates(entity.start, entity.end)) { price =>
-            complete(OK, price)
+          onSuccess(getByDates(entity.start, entity.end)) {
+            case price: AveragePrice => complete(OK, price)
+            case failure: BadAction => complete(OK, failure)
+            case _ => complete(BadRequest)
           }
         }
       }
@@ -83,8 +81,10 @@ trait RestRoutes extends StorageApi with StorageMarshaling {
       get {
         // GET /api/max_min_prices_by_dates
         entity(as[MaxMinByDates]) { entity =>
-          onSuccess(getMinMaxByDates(entity.start, entity.end)) { price =>
-            complete(OK, price)
+          onSuccess(getMinMaxByDates(entity.start, entity.end)) {
+            case price: MaxMinPrices => complete(OK, price)
+            case failure: BadAction => complete(OK, failure)
+            case response => complete(OK, response.toString)
           }
         }
       }

@@ -1,6 +1,6 @@
 # data_parsing_app
 
-## HTTPie
+### HTTPie
 http GET localhost:8080/text/1
 
 HTTP/1.1 200 OK \
@@ -11,9 +11,6 @@ Server: akka-http/10.2.6\
 1
 
 ### test json
-process csv file: \
-http GET localhost:8080/api/process
-
 price by date: \
 http GET localhost:8080/api/price_by_date <<< '{ "date":"2013-04-15" }'
 
@@ -23,5 +20,5 @@ http GET localhost:8080/api/average_price_by_dates <<< '{ "start":"2013-04-15", 
 max and min prices by dates: \
 http GET localhost:8080/api/max_min_prices_by_dates <<< '{ "start":"2013-03-15", "end":"2013-09-15" }'
 
-
-
+get cells: \
+http GET localhost:8080/api/cells
