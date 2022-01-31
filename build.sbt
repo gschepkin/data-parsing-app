@@ -9,14 +9,16 @@ lazy val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(server)
-  .dependsOn(server)
+  .aggregate(server, client)
+  .dependsOn(server, client)
   .disablePlugins(RevolverPlugin)
   .settings(
     name := "ParserApp"
   )
   
 lazy val server = project
+  .aggregate(client)
+  .dependsOn(client)
   .settings(
     commonSettings,
     name := "Server",
@@ -31,5 +33,13 @@ lazy val server = project
       "com.typesafe.akka" %% "akka-testkit" % "2.6.18" % Test
     )
   )
-  
+
+lazy val client = project
+  .disablePlugins(RevolverPlugin)
+  .settings(
+    commonSettings,
+    name := "Client",
+    Compile / unmanagedSourceDirectories += baseDirectory.value / "src" / "main" / "js"
+  )
+
 Compile / mainClass := Some("app.Server")

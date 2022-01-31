@@ -1,0 +1,7 @@
+.app {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    background: #2b3035;
+    font-family: Arial, sans-serif;
+}

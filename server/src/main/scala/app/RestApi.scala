@@ -32,9 +32,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling {
 
   startProcess(fileCSV)
 
-  def routes: Route = cells ~ priceForDate ~ averageForDates ~ maxMinForDates
-
-  val log = Logging(system.eventStream, "system")
+  def routes: Route = resources ~ cells ~ priceForDate ~ averageForDates ~ maxMinForDates ~ appPage
 
   def cells =
     path("api" / "cells") {
@@ -87,6 +85,22 @@ trait RestRoutes extends StorageApi with StorageMarshaling {
             case response => complete(OK, response.toString)
           }
         }
+      }
+    }
+
+  def resources =
+    path("resources" / Remaining) { resource =>
+      getFromResource(resource)
+    }
+
+  def appPage =
+    pathSingleSlash {
+      get {
+        getFromResource("index.html")
+      }
+    } ~ path(Remaining) { _ =>
+      get {
+        getFromResource("index.html")
       }
     }
 }
