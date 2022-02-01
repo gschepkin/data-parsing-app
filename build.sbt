@@ -3,6 +3,7 @@ import scala.language.postfixOps
 ThisBuild / organization := "com.schepkin"
 ThisBuild / version      := "0.1"
 ThisBuild / scalaVersion := "2.13.7"
+ThisBuild / logLevel     := Level.Error
 
 // solving problem with jar path
 run := Defaults.runTask(Runtime / fullClasspath, Compile / run / mainClass, run / runner).evaluated
