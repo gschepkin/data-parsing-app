@@ -22,3 +22,6 @@ http GET localhost:8080/api/max_min_prices_by_dates <<< '{ "start":"2013-03-15",
 
 get cells: \
 http GET localhost:8080/api/cells
+
+get cells by dates: \
+http GET localhost:8080/api/cells_by_dates <<< '{ "start":"2013-03-15", "end":"2013-09-15" }'

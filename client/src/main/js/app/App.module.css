@@ -1,7 +1,11 @@
 .app {
-    position: absolute;
-    width: 100vw;
+    width: calc(100vw - 40px);
     height: 100vh;
-    background: #2b3035;
     font-family: Arial, sans-serif;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    margin: auto;
+    padding-inline: 40px;
+    flex-direction: column;
 }

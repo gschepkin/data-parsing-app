@@ -4,6 +4,8 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props, Stash}
 import akka.pattern.ask
 import akka.stream.scaladsl.Flow
 import akka.util.Timeout
+import app.common.{IConvertTypes, ProcessCsv}
+import app.marshaling._
 
 import java.io.File
 import java.util.Date
@@ -26,7 +28,9 @@ object Storage {
 
   case object GetCells
   case class GetByDate(date: Date)
+  case class GetCellByDate(date: Date)
   case class GetByDates(start: Date, end: Date)
+  case class GetCellsByDates(start: Date, end: Date)
   case class GetMaxMinByDates(start: Date, end: Date)
 }
 
@@ -47,8 +51,8 @@ class Storage extends Actor with ActorLogging with Stash with ProcessCsv with IC
   }
 
   def process(data: Map[String, String]) = Cell(
-    data("Начало периода мониторинга цен на нефть").toDate,
-    data("Конец периода мониторинга цен на нефть").toDate,
+    data("Начало периода мониторинга цен на нефть").toDateRU,
+    data("Конец периода мониторинга цен на нефть").toDateRU,
     data("Средняя цена на нефть сырую марки «Юралс» на мировых рынках нефтяного сырья (средиземноморском и роттердамском)")
       .getDouble
   )
@@ -72,14 +76,26 @@ class Storage extends Actor with ActorLogging with Stash with ProcessCsv with IC
 
   def receiveProcessed: Receive = {
     case GetCells => log.info("GetCells")
-      sender() ! Cells(cache().toList)
+      cache().headOption foreach { head =>
+        cache().lastOption foreach { last =>
+          sender() ! Cells(head.start, last.end, cache().toList)
+        }
+      }
 
     case GetByDate(date) => log.info(s"GetByDate($date)")
       cache().collectFirst {
         case Cell(start, end, price) if start.getTime <= date.getTime && date.getTime <= end.getTime => price
       } match {
         case Some(price) => sender() ! Price(date, price)
-        case None => sender() ! BadAction("Sorry, storage doesn't have the price of the date")
+        case None => sender() ! BadAction(s"Sorry, storage doesn't have the price of the ${date}")
+      }
+
+    case GetCellByDate(date) => log.info(s"GetCellByDate($date)")
+      cache().collectFirst {
+        case cell @ Cell(start, end, _) if start.getTime <= date.getTime && date.getTime <= end.getTime => cell
+      } match {
+        case Some(cell) => sender() ! cell
+        case None => sender() ! BadAction(s"Sorry, storage doesn't have the price of the date, $date")
       }
 
     case GetByDates(targetStart, targetEnd) => log.info(s"GetByDates($targetStart, $targetEnd)")
@@ -99,9 +115,17 @@ class Storage extends Actor with ActorLogging with Stash with ProcessCsv with IC
         case (_, acc) => acc
       } match {
         case (min, max) if min != Double.MaxValue && max != Double.MinValue =>
-          sender() ! MaxMinPrices(targetStart, targetEnd, min, max)
+          sender() ! MaxMinPrices(targetStart, targetEnd, max, min)
         case _ =>
           sender() ! BadAction("Sorry, storage doesn't have min and max prices of the dates")
+      }
+
+    case GetCellsByDates(targetStart, targetEnd) => log.info(s"GetCellsByDates($targetStart, $targetEnd)")
+      cache().filter { cell =>
+        conditionByDates(targetStart, targetEnd, cell.start, cell.end)
+      } match {
+        case coll if coll.nonEmpty => sender() ! CellsByDatesResponse(targetStart, targetEnd, coll.toList)
+        case _ => sender() ! BadAction("Sorry, storage doesn't have prices of the dates")
       }
 
     case _ => log.error("Bad message")
@@ -130,9 +154,15 @@ trait StorageApi {
   def getByDate(date: Date) =
     storage.ask(GetByDate(date)).mapTo[StorageResponse]
 
+  def getCellByDate(date: Date) =
+    storage.ask(GetCellByDate(date)).mapTo[StorageResponse]
+
   def getByDates(start: Date, end: Date) =
     storage.ask(GetByDates(start, end)).mapTo[StorageResponse]
 
   def getMinMaxByDates(start: Date, end: Date) =
     storage.ask(GetMaxMinByDates(start, end)).mapTo[StorageResponse]
+
+  def getCellsByDates(start: Date, end: Date) =
+    storage.ask(GetCellsByDates(start, end)).mapTo[StorageResponse]
 }

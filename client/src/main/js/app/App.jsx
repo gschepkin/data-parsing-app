@@ -1,14 +1,14 @@
 import React from "react"
 import css from "./App.module.css"
+import "./app.css"
 import TableContainer from "../containers/TableContainer";
+import RangePickerContainer from "../containers/RangePickerContainer";
 
-const App = (props) => {
+const App = () => {
     return <div className={css.app}>
-        <TableContainer
-            name={'Processed data'}
-            keys={(obj) => ['Start date', 'End date', 'Price']}
-            values={(obj) => [obj.startDate, obj.endDate, obj.price]}
-        />
+        <h2>Processed file</h2>
+        <RangePickerContainer />
+        <TableContainer />
     </div>
 }
 

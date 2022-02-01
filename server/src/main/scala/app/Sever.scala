@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.util.Timeout
+import app.common.IDivideTuple
 import com.typesafe.config.{Config, ConfigFactory}
 
 import java.io.File
