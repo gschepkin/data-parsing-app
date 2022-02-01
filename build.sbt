@@ -43,4 +43,6 @@ lazy val client = project
     Compile / unmanagedSourceDirectories += baseDirectory.value / "src" / "main" / "js"
   )
 
+Compile / run / mainClass := Some("com.schepkin.Main")
+
 Compile / mainClass := Some("app.Server")
