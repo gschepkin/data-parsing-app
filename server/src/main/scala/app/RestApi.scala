@@ -40,8 +40,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
         // GET /api/cells
         onSuccess(getCells()) {
           case cells: Cells => complete(OK, cells)
-          case failure: BadAction => complete(OK, failure)
-          case _ => complete(BadRequest)
+          case bad: BadAction => complete(OK, bad)
         }
       }
     }
@@ -53,8 +52,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
         parameters("start", "end") { (start, end) =>
           onSuccess(getCellsByDates(start.toDate, end.toDate)) {
             case cells: CellsByDatesResponse => complete(OK, cells)
-            case failure: BadAction => complete(OK, failure)
-            case _ => complete(BadRequest)
+            case bad: BadAction => complete(OK, bad)
           }
         }
       }
@@ -67,8 +65,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
         parameters("date") { date =>
           onSuccess(getByDate(date.toDate)) {
             case price: Price => complete(OK, price)
-            case failure: BadAction => complete(OK, failure)
-            case _ => complete(BadRequest)
+            case bad: BadAction => complete(OK, bad)
           }
         }
       }
@@ -81,8 +78,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
         parameters("date") { date =>
           onSuccess(getCellByDate(date.toDate)) {
             case cell: Cell => complete(OK, cell)
-            case failure: BadAction => complete(OK, failure)
-            case _ => complete(BadRequest)
+            case bad: BadAction => complete(OK, bad)
           }
         }
       }
@@ -95,8 +91,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
         parameters("start", "end") { (start, end) =>
           onSuccess(getByDates(start.toDate, end.toDate)) {
             case price: AveragePrice => complete(OK, price)
-            case failure: BadAction => complete(OK, failure)
-            case _ => complete(BadRequest)
+            case bad: BadAction => complete(OK, bad)
           }
         }
       }
@@ -109,8 +104,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
         parameters("start", "end") { (start, end) =>
           onSuccess(getMinMaxByDates(start.toDate, end.toDate)) {
             case price: MaxMinPrices => complete(OK, price)
-            case failure: BadAction => complete(OK, failure)
-            case _ => complete(BadRequest)
+            case bad: BadAction => complete(OK, bad)
           }
         }
       }
