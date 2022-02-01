@@ -61,7 +61,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
   def priceForDate =
     path("api" / "price_by_date" ) {
       get {
-        // GET /api/price-by-date?date=...
+        // GET /api/price_by_date?date=...
         parameters("date") { date =>
           onSuccess(getByDate(date.toDate)) {
             case price: Price => complete(OK, price)
@@ -74,7 +74,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
   def cellForDate =
     path("api" / "cell_for_date" ) {
       get {
-        // GET /api/cell_by_date?date=...
+        // GET /api/cell_for_date?date=...
         parameters("date") { date =>
           onSuccess(getCellByDate(date.toDate)) {
             case cell: Cell => complete(OK, cell)
