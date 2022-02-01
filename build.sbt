@@ -19,6 +19,7 @@ lazy val root = (project in file("."))
 lazy val server = project
   .aggregate(client)
   .dependsOn(client)
+  .enablePlugins(JavaAppPackaging)
   .settings(
     commonSettings,
     name := "Server",
