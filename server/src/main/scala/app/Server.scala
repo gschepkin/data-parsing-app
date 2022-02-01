@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
  * Created by schepkin on 30.01.2022.
  */
 
-object Sever extends App with RequestTimeout with IDivideTuple {
+object Server extends App with RequestTimeout with IDivideTuple {
   val config = ConfigFactory.load()
   val host = config.getString("http.host")
   val port = config.getInt("http.port")
