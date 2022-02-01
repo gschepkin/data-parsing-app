@@ -124,7 +124,7 @@ class Storage extends Actor with ActorLogging with Stash with ProcessCsv with IC
       cache().filter { cell =>
         conditionByDates(targetStart, targetEnd, cell.start, cell.end)
       } match {
-        case coll if coll.nonEmpty => sender() ! CellsByDatesResponse(targetStart, targetEnd, coll.toList)
+        case coll if coll.nonEmpty => sender() ! Cells(targetStart, targetEnd, coll.toList)
         case _ => sender() ! BadAction("Sorry, storage doesn't have prices of the dates")
       }
 

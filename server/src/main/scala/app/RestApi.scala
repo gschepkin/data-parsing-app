@@ -51,7 +51,7 @@ trait RestRoutes extends StorageApi with StorageMarshaling with IConvertTypes {
         // GET /api/cells_by_dates?start=...&end=...
         parameters("start", "end") { (start, end) =>
           onSuccess(getCellsByDates(start.toDate, end.toDate)) {
-            case cells: CellsByDatesResponse => complete(OK, cells)
+            case cells: Cells => complete(OK, cells)
             case bad: BadAction => complete(OK, bad)
           }
         }
