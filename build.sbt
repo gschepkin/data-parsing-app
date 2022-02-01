@@ -4,8 +4,11 @@ ThisBuild / organization := "com.schepkin"
 ThisBuild / version      := "0.1"
 ThisBuild / scalaVersion := "2.13.7"
 
+// solving problem with jar path
+run := Defaults.runTask(Runtime / fullClasspath, Compile / run / mainClass, run / runner).evaluated
+
 lazy val commonSettings = Seq(
-  target := { baseDirectory.value / "_target" }
+  target := { baseDirectory.value / "_target" },
 )
 
 lazy val root = (project in file("."))
