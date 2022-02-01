@@ -96,6 +96,10 @@ GET /api/cell_for_date?date=*2010-02-13*
   "failure": "Sorry, storage doesn't have the price of the date, Sat Feb 13 00:00:00 YEKT 2010"
 }
 ```
+#### Develop
+To work with the server (increase functionality) you can use `sbt ~reStart` (from terminal) to realod the app on changes. \
+And to work with client to start you need to go to client-dir `cd client` and run `npm i` for installing all packages for developing. \
+To run the client in dev mode (to reload on changes) use `npm run dev` or `npm run prod` for reload in prod mode. If you use `npm run build` npm will build a production version without reloads on changes.
 
 ### Based on
 Server: *akka-http*, *akka-actor*, *akka-stream*, *spray-json* \
